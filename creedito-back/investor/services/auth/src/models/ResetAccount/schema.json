@@ -1,0 +1,29 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Register Schema",
+	"description": "Modelo de Registro",
+	"type": "object",
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["answer", "reset"]
+		},
+		"username": {
+			"type": "string",
+			"pattern": "^[A-z0-9 .]+@[A-z0-9 .]+$"
+		},
+		"answer": {
+			"type": "string",
+			"pattern": "^[A-z0-9]+$"
+		},
+		"questionId": {
+			"type": "string",
+			"pattern": "^[A-z0-9]+$"
+		},
+		"newPassword": {
+			"type": "string"
+		}
+	},
+	"required": ["type", "username", "answer", "questionId"],
+	"additionalProperties": false
+}

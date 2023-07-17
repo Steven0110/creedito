@@ -1,0 +1,43 @@
+investor-preget-user:
+  handler: src/functions/investor-preget-user/index.handler
+  name: ${opt:stage}-investor-preget-user
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 25
+
+  package:
+    include:
+      - src/functions/investor-preget-user/index.js
+
+  events:
+    - http:
+        path: preget-user/{username}
+        method: get
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            404:
+              pattern: '.*notfound.*'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

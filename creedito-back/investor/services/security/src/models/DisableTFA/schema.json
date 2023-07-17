@@ -1,0 +1,14 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Disable TFA Schema",
+	"description": "Modelo de Desactivación de TFA",
+	"type": "object",
+	"properties": {
+		"otp": {
+			"type": ["string", "number"],
+			"pattern": "^[0-9]+$"
+		}
+	},
+	"required": ["otp"],
+	"additionalProperties": false
+}

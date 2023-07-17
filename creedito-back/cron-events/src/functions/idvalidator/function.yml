@@ -1,0 +1,20 @@
+idvalidator:
+  handler: src/functions/idvalidator/index.handler
+  name: ${opt:stage}-idvalidator
+  runtime: nodejs12.x
+  memorySize: 512
+  timeout: 180
+
+  package:
+    include:
+      - src/functions/idvalidator/index.js
+
+  events:
+    - schedule:
+        rate: rate(5 minutes)
+        enabled: false
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:AxiosN12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:SHA512-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:QuerystringN12:1

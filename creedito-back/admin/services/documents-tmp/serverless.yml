@@ -1,0 +1,102 @@
+service: a-documents
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-domain-manager
+useDotenv: true
+
+custom:
+  stage: ${env:STAGE}
+  domains:
+    qa: qa-admin-api.investus.mx
+    dev: dev-admin-api.investus.mx
+    prod: admin-api.investus.mx
+
+  customDomain:
+    basePath: documents
+    domainName: ${self:custom.domains.${self:custom.stage}}
+    stage: ${self:custom.stage}
+    certificateName: "*.investus.mx"
+    createRoute53Record: false
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  profile: creedito
+  region: us-west-2
+  endpointType: EDGE
+  apiName: admin-${env:STAGE}-${self:service}
+  environment:
+    STAGE: ${env:STAGE}
+    MAILGUN_KEY: ${env:MAILGUN_KEY}
+    MAILGUN_DOMAIN: ${env:MAILGUN_DOMAIN}
+    MONGO_CONNSTRING: ${env:MONGO_CONNSTRING}
+
+  apiGateway:
+    apiKeys:
+      - name: "admin-${self:service}-${env:STAGE} API Key"
+        value: ${self:service}-${env:API_KEY}
+    usagePlan:
+      throttle:
+        burstLimit: 50
+        rateLimit: 100
+  iam:
+    role: arn:aws:iam::784598851667:role/lambda-role
+    cfnRole: arn:aws:iam::784598851667:role/serverless-role
+  vpc:
+    securityGroupIds:
+      - sg-0140142ba664c5a55
+    subnetIds:
+      - subnet-0eee6588aad1e5c9d
+      - subnet-0c3ab848c125ad99e
+      - subnet-0abe68e951cdf045e
+      - subnet-0e132049373eb2307
+
+resources:
+  Resources:
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: BAD_REQUEST_BODY
+        ResponseTemplates:
+          application/json: '{"message":$context.error.validationErrorString}'
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '400'
+    Forbidden:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: INVALID_API_KEY
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '403'
+    Denied:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  - ${file(./src/functions/admin-save-file/function.yml)} #admin Save Document File
+  - ${file(./src/functions/admin-session-authorizer/function.yml)} #admin Session Authorizer

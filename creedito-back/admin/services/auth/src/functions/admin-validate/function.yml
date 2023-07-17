@@ -1,0 +1,21 @@
+admin-validate:
+  handler: src/functions/admin-validate/index.handler
+  name: ${opt:stage}-admin-validate
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 25
+
+  environment:
+    APP_URL: ${env:APP_URL}
+
+  package:
+    include:
+      - src/functions/admin-validate/index.js
+
+  events:
+    - http:
+        path: validate/{hash}
+        method: get
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

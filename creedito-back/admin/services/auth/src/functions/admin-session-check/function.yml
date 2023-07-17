@@ -1,0 +1,48 @@
+admin-session-check:
+  handler: src/functions/admin-session-check/index.handler
+  name: ${opt:stage}-admin-session-check
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 25
+
+  environment:
+    COOKIE_DEF: ${env:COOKIE_DEF}
+
+  package:
+    include:
+      - src/functions/admin-session-check/index.js
+
+  events:
+    - http:
+        path: session/check
+        method: get
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            401:
+              pattern: '.*notok.*'
+              template: ${file(src/response-templates/invalid-session.yml)}
+              headers:
+                Set-Cookie: "'token=undefined; Expires=Thu, 01 Jan 1970 00:00:00 GMT; ${env:COOKIE_DEF}'"
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:JWT-N12:1

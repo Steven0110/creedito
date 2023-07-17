@@ -1,0 +1,25 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Update Company Schema",
+	"description": "Modelo de Empresa AAA",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		},
+		"rfc": {
+			"type": "string",
+			"pattern": "^[A-Z0-9\\.]+$"
+		},
+		"type": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		},
+		"rate": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		}
+	},
+	"additionalProperties": false
+}

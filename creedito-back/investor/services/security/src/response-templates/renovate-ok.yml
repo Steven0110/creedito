@@ -1,0 +1,3 @@
+"{\"message\": \"Renovación de sesión correcta.\"\
+,\"user\": $input.json('$.user')\
+}"

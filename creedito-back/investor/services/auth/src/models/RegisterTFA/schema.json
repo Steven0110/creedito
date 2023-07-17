@@ -1,0 +1,18 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Register Schema",
+	"description": "Modelo de Registro",
+	"type": "object",
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["verify", "generate"]
+		},
+		"otp": {
+			"type": ["string", "number"],
+			"pattern": "^[0-9]+$"
+		}
+	},
+	"required": ["type"],
+	"additionalProperties": false
+}

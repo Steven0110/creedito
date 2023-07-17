@@ -1,0 +1,51 @@
+developer-renovate-session:
+  handler: src/functions/developer-renovate-session/index.handler
+  name: ${opt:stage}-developer-renovate-session
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 25
+
+  environment:
+    COOKIE_DEF: ${env:COOKIE_DEF}
+
+  package:
+    include:
+      - src/functions/developer-renovate-session/index.js
+
+  events:
+    - http:
+        path: renovate-session
+        method: get
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+              template: ${file(src/response-templates/renovate-ok.yml)}
+              headers:
+                Set-Cookie: "integration.response.body.cookie"
+            401: #Wrong credentials
+              pattern: '.*notok.*'
+              template: '{message: "Error al renovar sesión"}'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:JWT-N12:1

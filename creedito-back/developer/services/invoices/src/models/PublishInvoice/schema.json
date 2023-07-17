@@ -1,0 +1,19 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Publish Invoice Schema",
+	"description": "Modelo para publicación de facturas preaprobadas",
+	"type": "object",
+	"properties": {
+		"creditTarget": {
+			"type": "string"
+		},
+		"invoicingType": {
+			"type": "string"
+		},
+		"image": {
+			"type": "string"
+		}
+	},
+	"required": ["creditTarget", "invoicingType", "image"],
+	"additionalProperties": false
+}

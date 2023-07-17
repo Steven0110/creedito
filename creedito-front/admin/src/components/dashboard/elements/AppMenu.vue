@@ -1,0 +1,216 @@
+<template lang="pug">
+	.creedito-menu
+		//Menú Desktop
+		.desktop.d-none.d-md-block
+			v-navigation-drawer(absolute, permanent, floating, color="primary", dark)
+
+				v-list
+					v-list-item(two-line)
+						v-list-item-avatar
+							img(:src="userPicture")
+						v-list-item-content
+							v-list-item-title
+								|{{$store.getters.user.name}}
+							v-list-item-subtitle
+								|{{$store.getters.user.role}}
+					
+					v-divider
+
+					v-list-item(link, exact, :to="{path: '/dashboard'}")
+						v-list-item-icon
+							v-icon
+								|mdi-home
+						v-list-item-content
+							v-list-item-title
+								|Inicio
+
+					v-list-item(link, exact, :to="{path: '/dashboard/facturas'}")
+						v-list-item-icon
+							v-icon
+								|mdi-file-outline
+						v-list-item-content
+							v-list-item-title
+								|Facturas
+
+
+					v-list-group.custom-list-group(prepend-icon="mdi-account")
+						template(v-slot:activator)
+							v-list-item-content
+								|Usuarios
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/inversionistas'}")
+							v-list-item-content
+								v-list-item-title
+									|Inversionistas
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/solicitantes'}")
+							v-list-item-content
+								v-list-item-title
+									|Solicitantes
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/catalogo-empresas'}")
+							v-list-item-content
+								v-list-item-title
+									|Catálogo AAA
+
+					v-list-group.custom-list-group(prepend-icon="mdi-settings")
+						template(v-slot:activator)
+							v-list-item-content
+								|Ajustes
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/perfil'}")
+							v-list-item-content
+								v-list-item-title
+									|Perfil
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/autenticacion'}")
+							v-list-item-content
+								v-list-item-title
+									|Autenticación
+					v-list-item(link, exact, @click="logout")
+						v-list-item-icon
+							v-icon
+								|mdi-logout
+						v-list-item-content
+							v-list-item-title
+								|Cerrar sesión
+
+				template(v-slot:append)
+					.last-session(v-if="$store.getters.user.lastSession")
+						|Última sesión: {{ $moment($store.getters.user.lastSession).format("MMMM D, h:mm:ss a") }}
+
+		//Menú Mobile
+		.mobile.d-block.d-md-none
+			v-navigation-drawer(absolute, temporary, v-model="drawer", color="primary", dark)
+				v-list(dense)
+					v-list-item(two-line)
+						v-list-item-avatar
+							img(:src="userPicture")
+						v-list-item-content
+							v-list-item-title
+								|{{$store.getters.user.name}}
+							v-list-item-subtitle
+								|{{$store.getters.user.role}}
+
+					v-list-item(link, exact, :to="{path: '/dashboard/'}")
+						v-list-item-icon
+							v-icon
+								|mdi-home
+						v-list-item-content
+							v-list-item-title
+								|Inicio
+
+					v-list-item(link, exact, :to="{path: '/dashboard/facturas'}")
+						v-list-item-icon
+							v-icon
+								|mdi-file-outline
+						v-list-item-content
+							v-list-item-title
+								|Facturas
+								
+					v-list-group.custom-list-group(prepend-icon="mdi-account")
+						template(v-slot:activator)
+							v-list-item-content
+								|Usuarios
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/inversionistas'}")
+							v-list-item-content
+								v-list-item-title
+									|Inversionistas
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/solicitantes'}")
+							v-list-item-content
+								v-list-item-title
+									|Solicitantes
+						v-list-item.list-child(link, exact, :to="{path: '/dashboard/catalogo-empresas'}")
+							v-list-item-content
+								v-list-item-title
+									|Catálogo AAA
+
+
+					v-list-item(link, exact, @click="logout")
+						v-list-item-icon
+							v-icon
+								|mdi-logout
+						v-list-item-content
+							v-list-item-title
+								|Cerrar sesión
+
+
+				template(v-slot:append)
+					.last-session(v-if="$store.getters.user.lastSession")
+						|Última sesión: {{ $moment($store.getters.user.lastSession).format("MMMM D, h:mm:ss a") }}
+</template>
+
+<script>
+	export default{
+		data() {
+			return {
+				drawer: false,
+				navigation: null
+			}
+		},
+		computed: {
+			userPicture: function() {
+				return this.$store.getters.user.picture || "/assets/icons/avatar_male.svg"
+			}
+		},
+		methods: {
+			toggle: function() {
+				this.drawer =! this.drawer
+			},
+			logout: function() {
+				
+				this.$swal({
+					title: "¿Estás seguro que deseas cerrar tu sesión?",
+					type: "warning",
+					confirmButtonText: "Sí, cerrar sesión.",
+					cancelButtonText: "No, regresar.",
+					showLoaderOnConfirm: true,
+					showCancelButton: true,
+					reverseButtons: true,
+					preConfirm: () => {
+						let resource = "logout"
+						return this.$auth.get( resource )
+					}
+				})
+				.then(result => {
+					if(!result.dismiss){
+						this.$store.commit("setSessionActive", false)
+						this.$swal({
+							title: `Sesión cerrada exitosamente.`,
+							text: "",
+							type: "success",
+							showConfirmButton: false,
+							timer: 3000,
+							onClose: () => {
+								this.$router.push({path: "/"})
+							}
+						})
+					}
+				})
+				.catch(err => {
+					console.log( err )
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="sass">
+	.creedito-menu
+		.menu-logo
+			text-align: center
+			padding-top: 15px
+			img
+				max-width: 50%
+				display: inline-block
+
+		.custom-list-group
+			.list-child
+				padding-left: 25px
+
+		.custom-list-group
+			&.v-list-group--active
+				color: white !important
+				caret-color: white !important
+				background-color: rgba(255, 255, 255, 0.15)
+		.last-session
+			color: white
+			text-align: center
+			font-size: 11px
+			padding-bottom: 5px
+</style>

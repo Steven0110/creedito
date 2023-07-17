@@ -1,0 +1,16 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Change Password Schema",
+	"description": "Modelo de Cambio de Contraseña",
+	"type": "object",
+	"properties": {
+		"newPassword": {
+			"type": "string"
+		},
+		"oldPassword": {
+			"type": "string"
+		}
+	},
+	"required": ["newPassword", "oldPassword"],
+	"additionalProperties": false
+}

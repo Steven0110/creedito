@@ -1,0 +1,16 @@
+admin-developer-session-authorizer:
+  handler: src/functions/admin-developer-session-authorizer/index.handler
+  name: ${opt:stage}-admin-developer-session-authorizer
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 5
+
+  environment:
+    APP_URL: ${env:APP_URL}
+
+  package:
+    include:
+      - src/functions/admin-developer-session-authorizer/index.js
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

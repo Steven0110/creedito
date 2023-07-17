@@ -1,0 +1,16 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Approve Invoice Schema",
+	"description": "Modelo de Aprobación de Facturas",
+	"type": "object",
+	"properties": {
+		"discount": {
+			"type": "number"
+		},
+		"risks": {
+			"type": "array"
+		}
+	},
+	"required": ["discount"],
+	"additionalProperties": false
+}

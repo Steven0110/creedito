@@ -1,0 +1,110 @@
+service: a-invoices
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-domain-manager
+useDotenv: true
+
+custom:
+  stage: ${env:STAGE}
+  domains:
+    qa: qa-admin-api.creedito.mx
+    dev: dev-admin-api.creedito.mx
+    prod: admin-api.creedito.mx
+
+  customDomain:
+    basePath: invoices
+    domainName: ${self:custom.domains.${self:custom.stage}}
+    stage: ${self:custom.stage}
+    certificateName: "*.creedito.mx"
+    createRoute53Record: false
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  profile: creedito
+  region: us-west-2
+  endpointType: EDGE
+  apiName: admin-${env:STAGE}-${self:service}
+  environment:
+    STAGE: ${env:STAGE}
+    MAILGUN_KEY: ${env:MAILGUN_KEY}
+    MAILGUN_DOMAIN: ${env:MAILGUN_DOMAIN}
+    MONGO_CONNSTRING: ${env:MONGO_CONNSTRING}
+
+  apiGateway:
+    apiKeys:
+      - name: "admin-${self:service}-${env:STAGE} API Key"
+        value: ${self:service}-${env:API_KEY}
+    usagePlan:
+      throttle:
+        burstLimit: 50
+        rateLimit: 100
+    
+  iam:
+    role: arn:aws:iam::295910683422:role/lambda-role
+    deploymentRole: arn:aws:iam::295910683422:role/serverless-role
+  vpc:
+    securityGroupIds:
+      - sg-0b18cda0e44a0f694
+    subnetIds:
+      - subnet-005d65803189ae21b
+      - subnet-0141d1d48eae6d10c
+      - subnet-015678848fa80afbc
+      - subnet-0b7facfe5d7bd7c96
+
+resources:
+  Resources:
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: BAD_REQUEST_BODY
+        ResponseTemplates:
+          application/json: '{"message":$context.error.validationErrorString}'
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '400'
+    Forbidden:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: INVALID_API_KEY
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '403'
+    Denied:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  - ${file(./src/functions/admin-invoices-session-authorizer/function.yml)} #Session Authorizer
+  - ${file(./src/functions/admin-invoices-find/function.yml)} #Get All invoices
+  - ${file(./src/functions/admin-invoice-reject/function.yml)} #Get All invoices
+  - ${file(./src/functions/admin-invoice-approve/function.yml)} #Get All invoices
+  - ${file(./src/functions/admin-get-invoice/function.yml)} #Get One invoice
+  - ${file(./src/functions/admin-aaa-get/function.yml)} #Empresas AAA
+  #- ${file(./src/functions/admin-aaa-create/function.yml)} #Empresas AAA
+  #- ${file(./src/functions/admin-aaa-delete/function.yml)} #Empresas AAA
+  #- ${file(./src/functions/admin-aaa-update/function.yml)} #Empresas AAA

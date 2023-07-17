@@ -1,0 +1,21 @@
+sumamonitor:
+  handler: src/functions/sumamonitor/index.handler
+  name: ${opt:stage}-sumamonitor
+  runtime: nodejs12.x
+  memorySize: 512
+  timeout: 300
+
+  package:
+    include:
+      - src/functions/sumamonitor/index.js
+
+  events:
+    - schedule:
+        rate: rate(5 minutes)
+        enabled: false
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:AxiosN12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mailgun-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:FormDataN12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:Catalog:1

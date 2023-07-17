@@ -1,0 +1,8 @@
+api:
+  info:
+    version: "1.0.0"
+models:
+  - name: "Login"
+    description: "Modelo para login (inversionista, desarrollador y administrador)"
+    contentType: "application/json"
+    schema: ${file(./src/models/Login/schema.json)}

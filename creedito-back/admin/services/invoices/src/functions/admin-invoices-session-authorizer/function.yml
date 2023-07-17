@@ -1,0 +1,16 @@
+admin-invoices-session-authorizer:
+  handler: src/functions/admin-invoices-session-authorizer/index.handler
+  name: ${opt:stage}-admin-invoices-session-authorizer
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 5
+
+  environment:
+    APP_URL: ${env:APP_URL}
+
+  package:
+    include:
+      - src/functions/admin-invoices-session-authorizer/index.js
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

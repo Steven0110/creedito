@@ -1,0 +1,42 @@
+service: process
+
+plugins:
+  - serverless-dotenv-plugin
+
+useDotenv: true
+#configValidationMode: off
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: creedito
+  region: us-west-2
+  endpointType: EDGE
+  environment:
+    STAGE: ${env:STAGE}
+    MAILGUN_KEY: ${env:MAILGUN_KEY}
+    MAILGUN_DOMAIN: ${env:MAILGUN_DOMAIN}
+    MONGO_CONNSTRING: ${env:MONGO_CONNSTRING}
+  iam:
+    role: arn:aws:iam::295910683422:role/lambda-role
+    deploymentRole: arn:aws:iam::295910683422:role/serverless-role
+  vpc:
+    securityGroupIds:
+      - sg-0b18cda0e44a0f694
+    subnetIds:
+      - subnet-005d65803189ae21b
+      - subnet-0141d1d48eae6d10c
+      - subnet-015678848fa80afbc
+      - subnet-0b7facfe5d7bd7c96
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  - ${file(./src/functions/codecommit-notifications/function.yml)} #Commits Notifications
+  - ${file(./src/functions/sessionkiller/function.yml)} #Session Killer
+  - ${file(./src/functions/idvalidator/function.yml)} #ID Checker Cron
+  - ${file(./src/functions/sumamonitor/function.yml)} #ID Checker Cron
+  - ${file(./src/functions/companies-updater/function.yml)} #ID Checker Cron

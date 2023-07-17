@@ -1,0 +1,52 @@
+admin-aaa-create:
+  handler: src/functions/admin-aaa-create/index.handler
+  name: ${opt:stage}-admin-aaa-create
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 25
+
+  package:
+    include:
+      - src/functions/admin-aaa-create/index.js
+
+  events:
+    - http:
+        path: companies
+        method: post
+        authorizer:
+          name: admin-invoices-session-authorizer
+          type: request
+          resultTtlInSeconds: 0
+          identitySource: ''
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          schemas:
+             application/json: ${file(src/models/CreateCompany/schema.json)}
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            406:
+              pattern: '.*E11000.*'
+              message: '{"message": "Duplicated RFC"}'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

@@ -1,0 +1,55 @@
+developer-invoice-add-document:
+  handler: src/functions/developer-invoice-add-document/index.handler
+  name: ${opt:stage}-developer-invoice-add-document
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 25
+
+  package:
+    include:
+      - src/functions/developer-invoice-add-document/index.js
+
+  events:
+    - http:
+        path: invoice/{id}/add-document
+        method: post
+        authorizer:
+          name: invoices-session-authorizer
+          type: request
+          resultTtlInSeconds: 0
+          identitySource: ''
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          schemas:
+             application/json: ${file(src/models/SaveFile/schema.json)}
+          parameters:
+            paths:
+              id: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            409:
+              pattern: '.*uploaded.*'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:Catalog:1

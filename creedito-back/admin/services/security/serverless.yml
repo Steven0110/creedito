@@ -1,0 +1,114 @@
+service: a-security
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-domain-manager
+useDotenv: true
+
+custom:
+  stage: ${env:STAGE}
+  domains:
+    qa: qa-admin-api.creedito.mx
+    dev: dev-admin-api.creedito.mx
+    prod: admin-api.creedito.mx
+
+  customDomain:
+    basePath: security
+    domainName: ${self:custom.domains.${self:custom.stage}}
+    stage: ${self:custom.stage}
+    certificateName: "*.creedito.mx"
+    createRoute53Record: false
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  profile: creedito
+  region: us-west-2
+  endpointType: EDGE
+  apiName: admin-${env:STAGE}-${self:service}
+  environment:
+    STAGE: ${env:STAGE}
+    MAILGUN_KEY: ${env:MAILGUN_KEY}
+    MAILGUN_DOMAIN: ${env:MAILGUN_DOMAIN}
+    MONGO_CONNSTRING: ${env:MONGO_CONNSTRING}
+
+  apiGateway:
+    apiKeys:
+      - name: "admin-${self:service}-${env:STAGE} API Key"
+        value: ${self:service}-${env:API_KEY}
+    usagePlan:
+      throttle:
+        burstLimit: 50
+        rateLimit: 100
+    
+  iam:
+    role: arn:aws:iam::295910683422:role/lambda-role
+    deploymentRole: arn:aws:iam::295910683422:role/serverless-role
+  vpc:
+    securityGroupIds:
+      - sg-0b18cda0e44a0f694
+    subnetIds:
+      - subnet-005d65803189ae21b
+      - subnet-0141d1d48eae6d10c
+      - subnet-015678848fa80afbc
+      - subnet-0b7facfe5d7bd7c96
+
+resources:
+  Resources:
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: BAD_REQUEST_BODY
+        ResponseTemplates:
+          application/json: '{"message":$context.error.validationErrorString}'
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '400'
+    Forbidden:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: INVALID_API_KEY
+        RestApiId: 
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '403'
+    Denied:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:ALLOWED_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  - ${file(./src/functions/admin-otp-authorizer/function.yml)} #admin OTP Authorizer
+  - ${file(./src/functions/admin-set-secret-image/function.yml)} #admin Set Secret Image
+  - ${file(./src/functions/admin-register-tfa/function.yml)} #admin Register and Validate TFA
+  - ${file(./src/functions/admin-resend-validation/function.yml)} #admin Register and Validate TFA
+  - ${file(./src/functions/admin-set-security-questions/function.yml)} #admin Set Security Questions
+  - ${file(./src/functions/admin-disable-tfa/function.yml)} #admin Disable TFA
+  - ${file(./src/functions/admin-send-reset-email/function.yml)} #admin Send Reset Email
+  - ${file(./src/functions/admin-send-unlock-email/function.yml)} #admin Send Unlock Email
+  - ${file(./src/functions/admin-reset-account/function.yml)} #admin Reset Account
+  - ${file(./src/functions/admin-confirm-reset/function.yml)} #admin Answer and reset
+  - ${file(./src/functions/admin-unlock-account/function.yml)} #admin Unlock Account
+  - ${file(./src/functions/admin-change-password/function.yml)} #admin Change Password
+  - ${file(./src/functions/admin-update-info/function.yml)} #admin Change Password

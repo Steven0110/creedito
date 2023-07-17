@@ -1,0 +1,53 @@
+developer-delete-invoice:
+  handler: src/functions/developer-delete-invoice/index.handler
+  name: ${opt:stage}-developer-delete-invoice
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 25
+
+  package:
+    include:
+      - src/functions/developer-delete-invoice/index.js
+
+  events:
+    - http:
+      
+        path: invoice/{id}
+        method: delete
+        authorizer:
+          name: invoices-session-authorizer
+          type: request
+          resultTtlInSeconds: 0
+          identitySource: ''
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          parameters:
+            paths:
+              id: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            406:
+              pattern: '.*undeleted.*'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

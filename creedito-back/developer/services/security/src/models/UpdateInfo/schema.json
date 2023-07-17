@@ -1,0 +1,52 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Update user information Schema",
+	"description": "Modelo de actualización de información",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		},
+		"rfc": {
+			"type": "string",
+			"pattern": "^[A-z0-9]*$"
+		},
+		"profilePicture": {
+			"type": "string",
+			"pattern": "^[A-z0-9\\.\/\\-]*$"
+		},
+		"type": {
+			"type": "string",
+			"enum": ["fisica", "moral"]
+		},
+		"company": {
+			"type": "object",
+			"properties": {
+				"image": {
+					"type": "string"
+				},
+				"taxName": {
+					"type": "string"
+				},
+				"constitutionDate": {
+					"type": "string"
+				},
+				"taxAddress": {
+					"type": "string"
+				},
+				"websiteURL": {
+					"type": "string"
+				},
+				"annualIncome": {
+					"type": "number"
+				},
+				"equity": {
+					"type": "number"
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"additionalProperties": false
+}

@@ -1,0 +1,41 @@
+admin-logout:
+  handler: src/functions/admin-logout/index.handler
+  name: ${opt:stage}-admin-logout
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 20
+
+  package:
+    include:
+      - src/functions/admin-logout/index.js
+
+  events:
+    - http:
+        path: logout
+        method: get
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+              headers:
+                Set-Cookie: "'token=undefined; Expires=Thu, 01 Jan 1970 00:00:00 GMT; ${env:COOKIE_DEF}'"
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

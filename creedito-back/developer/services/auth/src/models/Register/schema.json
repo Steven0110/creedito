@@ -1,0 +1,24 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Register Schema",
+	"description": "Modelo de Registro",
+	"type": "object",
+	"properties": {
+		"username": {
+			"type": "string",
+			"pattern": "^[A-z0-9 .]+@[A-z0-9 .]+$"
+		},
+		"password": {
+			"type": "string"
+		},
+		"name": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		},
+		"type": {
+			"type": "string"
+		}
+	},
+	"required": ["username", "password", "name", "type"],
+	"additionalProperties": false
+}

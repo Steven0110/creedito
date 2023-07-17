@@ -1,0 +1,17 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Save File Schema",
+	"description": "Modelo para guardado de archivos a usuarios",
+	"type": "object",
+	"properties": {
+		"key": {
+			"type": "string"
+		},
+		"type": {
+			"type": "string",
+			"pattern": "^[A-zÀ-ÖØ-öø-ÿ][A-zÀ-ÖØ-öø-ÿ\\s]*$"
+		}
+	},
+	"required": ["key", "type"],
+	"additionalProperties": false
+}

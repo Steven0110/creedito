@@ -1,0 +1,21 @@
+admin-unlock-account:
+  handler: src/functions/admin-unlock-account/index.handler
+  name: ${opt:stage}-admin-unlock-account
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 20
+
+  environment:
+    APP_URL: ${env:APP_URL}
+
+  package:
+    include:
+      - src/functions/admin-unlock-account/index.js
+
+  events:
+    - http:
+        path: unlock-account/{hash}
+        method: get
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

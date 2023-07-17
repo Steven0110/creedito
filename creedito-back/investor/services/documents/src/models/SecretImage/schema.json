@@ -1,0 +1,14 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Set Secret Image Schema",
+	"description": "Modelo de configuracion de imagen secreta",
+	"type": "object",
+	"properties": {
+		"secretImage": {
+			"type": "string",
+			"pattern": "^[A-z0-9]*\\.[jpg|jpeg|png|gif]+$"
+		}
+	},
+	"required": ["secretImage"],
+	"additionalProperties": false
+}

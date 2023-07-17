@@ -1,0 +1,52 @@
+investor-confirm-reset:
+  handler: src/functions/investor-confirm-reset/index.handler
+  name: ${opt:stage}-investor-confirm-reset
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 20
+
+  package:
+    include:
+      - src/functions/investor-confirm-reset/index.js
+
+  events:
+    - http:
+        path: confirm-reset-account
+        method: post
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          schema:
+             application/json: ${file(src/models/ResetAccount/schema.json)}
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            401:
+              pattern: '.*wronganswer.*'
+              template: "{'message':'Respuesta incorrecta'}"
+            406:
+              pattern: '.*runtime.*'
+              template: "{'message':'No se pudo modificar la contraseña'}"
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mailgun-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:SHA512-N12:1

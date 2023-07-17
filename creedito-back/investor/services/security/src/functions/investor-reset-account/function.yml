@@ -1,0 +1,21 @@
+investor-reset-account:
+  handler: src/functions/investor-reset-account/index.handler
+  name: ${opt:stage}-investor-reset-account
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 20
+
+  environment:
+    APP_URL: ${env:APP_URL}
+
+  package:
+    include:
+      - src/functions/investor-reset-account/index.js
+
+  events:
+    - http:
+        path: reset-account/{hash}
+        method: get
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

@@ -1,0 +1,52 @@
+admin-invoice-reject:
+  handler: src/functions/admin-invoice-reject/index.handler
+  name: ${opt:stage}-admin-invoice-reject
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 25
+
+  package:
+    include:
+      - src/functions/admin-invoice-reject/index.js
+
+  events:
+    - http:
+        path: reject/{id}
+        method: post
+        authorizer:
+          name: admin-invoices-session-authorizer
+          type: request
+          resultTtlInSeconds: 0
+          identitySource: ''
+        cors:
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          parameters:
+            paths:
+              id: true
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            404:
+              pattern: '.*notfound.*'
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1

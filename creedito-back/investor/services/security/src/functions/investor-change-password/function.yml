@@ -1,0 +1,49 @@
+investor-change-password:
+  handler: src/functions/investor-change-password/index.handler
+  name: ${opt:stage}-investor-change-password
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 20
+
+  package:
+    include:
+      - src/functions/investor-change-password/index.js
+
+  events:
+    - http:
+        path: change-password
+        method: post
+        cors: 
+          origin: ${env:ALLOWED_ORIGIN}
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Credentials
+          allowCredentials: true
+        integration: lambda
+        private: true
+        request:
+          schema:
+             application/json: ${file(src/models/ChangePassword/schema.json)}
+        response:
+          headers:
+            Access-Control-Allow-Credentials: "'true'"
+          statusCodes:
+            200:
+              pattern: ''
+            406:
+              pattern: '.*wrong.*'
+              template: "{'message':'Contraseña incorrecta'}"
+            500:
+              pattern: '.*rror.*'
+
+  layers:
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mongo-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:Mailgun-N12:1
+    - arn:aws:lambda:us-west-2:295910683422:layer:SHA512-N12:1

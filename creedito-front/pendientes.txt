@@ -1,0 +1,5 @@
+- Cuando das back en factura, las facturas no se cargan
+- Endpoint Test no funciona en QA
+- Agregar fecha de subida de las facturas
+- Una vez agregada la factura el boton de agregar no funciona
+- Ajustar tamaño de nuevo para monitores pequeños
